@@ -80,8 +80,10 @@ def get_sectors():
     page_parsed = STOCK_PAGE['SECTORS']
 
     data = re.search(r'var rows = (\[{.*}\])', page_parsed)
-    return json.loads(data.groups()[0])
-
+    new_data = {}
+    for i in json.loads(data.groups()[0]):
+        new_data[i['label']] = i
+    return new_data
 
 def get_insider(ticker):
     """
