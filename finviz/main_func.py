@@ -1,11 +1,14 @@
 from datetime import datetime
 
+import re, json
+
 from lxml import etree
 
 from finviz.helper_functions.request_functions import http_request_get
 from finviz.helper_functions.scraper_functions import get_table
 
 STOCK_URL = "https://finviz.com/quote.ashx"
+SECTOR_URL = "https://finviz.com/groups.ashx"
 NEWS_URL = "https://finviz.com/news.ashx"
 CRYPTO_URL = "https://finviz.com/crypto_performance.ashx"
 STOCK_PAGE = {}
@@ -19,6 +22,12 @@ def get_page(ticker):
             url=STOCK_URL, payload={"t": ticker}, parse=True
         )
 
+def get_sectors_page():
+    global SECTOR_URL
+
+    STOCK_PAGE['SECTORS'], _ = http_request_get(
+        url=SECTOR_URL, parse=False
+    )
 
 def get_stock(ticker):
     """
@@ -59,6 +68,19 @@ def get_stock(ticker):
             data[row[column]] = row[column + 1]
 
     return data
+
+def get_sectors():
+    """
+    Returns a dictionary containing sectors data.
+
+    :return dict
+    """
+
+    get_sectors_page()
+    page_parsed = STOCK_PAGE['SECTORS']
+
+    data = re.search(r'var rows = (\[{.*}\])', page_parsed)
+    return json.loads(data.groups()[0])
 
 
 def get_insider(ticker):
